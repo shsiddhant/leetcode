@@ -1,0 +1,177 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsthm, mathtools}
+
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+
+\begin{document}
+
+\section*{1. Introduction}
+
+Given a source point $s = (a, b)$ and a target point $t = (c, d)$, is it possible to go from $s$ to $t$ using a certain set of moves?
+If so, what is the minimum number of moves required?
+
+\subsection*{Forward Moves}
+
+Let  $V=\mathbb{N}_0^2$, where $\mathbb{N}_0=\{0,1,2,\ldots\}$ is the set of all non-negative integers.
+
+\begin{definition}[Forward move]
+	For $(a,b)\in V$, define
+	\[
+		m(a,b)=\max\{a,b\}.
+	\]
+	We say that $(a',b')$ is obtained from $(a,b)$ by one
+	\emph{forward move}, and write
+	\[
+		(a,b)\longrightarrow(a',b'),
+	\]
+	if either
+	\[
+		(a',b')=(a+m(a,b),b)
+	\]
+	or
+	\[
+		(a',b')=(a,b+m(a,b)).
+	\]
+
+	A point $(x,y)$ is \emph{reachable} from $(a,b)$ if there exists
+	$n\geq 0$ and a sequence of points
+	\[
+		(a,b)=(x_0,y_0)\longrightarrow
+		(x_1,y_1)\longrightarrow\cdots\longrightarrow
+		(x_n,y_n)=(x,y).
+	\]
+
+\end{definition}
+
+Our goal is to determine whether a target point is reachable from a
+given source point, and if so, to find the minimum number of moves.
+
+
+\section*{2. Predecessors}
+
+\begin{definition}[Predecessor]
+	A point $p \in V$ is a predecessor of $q \in V$ if there exists a forward move on $p$ that takes it to
+	$q$.
+\end{definition}
+
+\subsection*{Off-Diagonal Points}
+
+The key observation is that every off-diagonal point has at most one predecessor.
+
+\begin{lemma}
+	Let $(c,d)\in V$ with $c<d$.
+	Suppose that $(c,d)$ has a predecessor $(a,b)$. Then:
+
+	\[
+		(a,b)= \begin{dcases*}
+			(c,d-c)                 & if $d \leq 2c$            \\
+			\left(c,\frac d2\right) & if $d>2c$ and $d$ is even
+		\end{dcases*}
+	\]
+
+	In particular, the predecessor is unique when it exists, and if d is odd and $d > 2c$,
+	then $(c,d)$ has no predecessor.
+
+\end{lemma}
+
+\begin{proof}
+	Suppose $(a,b)\in V$ is a predecessor of $(c, d)$. If $a \geq b$, then the forward move must be $(a, a+b)$ since $c<d$ and $b\geq 0$.
+	Hence $a=c$ and $b=d-c$. Further, $a\geq b$ implies that $d\leq 2c$.
+
+	If $a<b$, the forward move must be $(a, 2b)$ since $a+b\geq b$. Hence $a=c$ and $2b=d$. So $d$ must be even and $b=d/2$.
+
+\end{proof}
+
+By symmetry, the case $c > d$ follows as well.
+
+\subsection*{Diagonal Points}
+
+The only points for which branching can occur are points on the diagonal.
+
+\begin{lemma}
+	For $c>0$, $(c,c)$ has exactly two predecessors, namely $(0,c)$ and $(c,0)$.
+
+\end{lemma}
+
+\begin{proof}
+	We have
+	\[
+		(0,c)\longrightarrow(c,c)
+	\]
+	because
+	\[
+		\max\{0,c\}=c,
+	\]
+	and similarly
+	\[
+		(c,0)\longrightarrow(c,c).
+	\]
+
+	Conversely, suppose $(a,b)$ is a predecessor of $(c,c)$. If $a \leq b$, then the forward move must be
+	$(a+b, b)$ since $c>0$, or else $a=2b\geq b \implies c=0$. Hence $b=0$ and $a=c$.
+
+	Similarly, if $a > b$, the forward move must be $(a, a+b)$. Hence $a=0$ and $b=c$.
+\end{proof}
+
+\begin{remark}
+The origin $(0,0)$ is a special case. It is its own predecessor since it's a fixed point under the forward move.
+\end{remark}
+
+\section*{3. Reversing a path}
+
+The predecessor relation allows us to turn the original reachability problem around.
+
+
+\begin{lemma}[Reverse paths preserve length]
+	Let
+	\[
+		(a,b)=(x_0,y_0)\longrightarrow
+		(x_1,y_1)\longrightarrow\cdots\longrightarrow
+		(x_n,y_n)=(c,d)
+	\]
+	be a sequence of forward moves. Then
+	\[
+		(c,d)=(x_n,y_n)\longrightarrow
+		(x_{n-1},y_{n-1})\longrightarrow\cdots\longrightarrow
+		(x_0,y_0)=(a,b)
+	\]
+	is a sequence of $n$ reverse moves.
+
+	Therefore, minimizing the number of forward moves and minimizing the number of reverse moves are equivalent.
+\end{lemma}
+
+
+\begin{corollary}
+	A point $(c,d)$ is reachable from $(a,b)$ if and only if there exists a reverse path
+	\[
+		(c,d)=(x_0,y_0)\longrightarrow
+		(x_1,y_1)\longrightarrow\cdots\longrightarrow
+		(x_n,y_n)=(a,b)
+	\]
+	such that each $(x_{i+1},y_{i+1})$ is a predecessor of
+	$(x_i,y_i)$.
+
+	Moreover, the minimum number of forward moves from $(a,b)$ to $(c,d)$ is
+	equal to the minimum number of reverse moves from $(c,d)$ to $(a,b)$.
+\end{corollary}
+
+\section*{4. The Algorithm}
+
+With the help of the preceding results, we gain a powerful insight: instead of searching for the target
+in a sea of forward paths, we can work backwards from the target.
+
+Since the predecessor, if it exists, has one of the co-ordinates decreasing at each step until
+we arrive at either the source or a point with no predecessor, or the special case, origin $(0, 0)$.
+As mentioned in Remark 1, that is possible only if target itself is origin.
+Thus either $s=(0,0)$ or the algorithm terminates immediately.
+
+At every non-diagonal point, the predecessor is unique whenever it exists. At a diagonal point, there are two predecessors. From the lemmas, we can infer that the predecessor of an axis point must be on the same axis. Hence the choice of branch at diagonal point is determined by $s$.
+
+Thus the complete reverse algorithm is deterministic: at each step there is at most one predecessor that can possibly lead to the specified source.
+
+\end{document}
